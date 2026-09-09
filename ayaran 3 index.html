@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عیاران و کاکاها</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* === RESET & BASE === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            background-color: #e6f3ff; /* light blue base */
+        }
+
+        /* === SPLASH SCREEN === */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #b3d9ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+            text-align: center;
+            color: #1a3a5c;
+        }
+
+        #splash h1 {
+            font-size: 4rem;
+            margin: 0.3rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #splash .sub {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            opacity: 0.8;
+        }
+
+        #splash .credit {
+            margin-top: 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            border-top: 1px solid rgba(26,58,92,0.3);
+            padding-top: 1.5rem;
+            width: 60%;
+        }
+
+        /* === MAIN PAGE === */
+        #main {
+            display: none;
+            position: relative;
+            min-height: 100vh;
+            padding: 2rem 1rem 2rem;
+            background-color: #e6f3ff;
+            overflow: hidden;
+        }
+
+        /* Background watermark texts */
+        .bg-text {
+            position: absolute;
+            font-size: 3rem;
+            font-weight: bold;
+            color: rgba(135, 206, 250, 0.15);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            transform: rotate(-10deg) scale(1.2);
+            z-index: 0;
+        }
+
+        /* Container for main content */
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 90vh;
+        }
+
+        /* Header title */
+        .header-title {
+            text-align: center;
+            padding: 1.5rem 0 2rem;
+        }
+
+        .header-title h1 {
+            font-size: 3.5rem;
+            color: #1a3a5c;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-title .subtitle {
+            font-size: 1.3rem;
+            color: #2b5a7a;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        /* Grid of member cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+            justify-items: center;
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 30px;
+            padding: 1.8rem 1.2rem 1.8rem;
+            box-shadow: 0 15px 30px rgba(0, 40, 80, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            width: 100%;
+            max-width: 260px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .member-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 40px rgba(0, 40, 80, 0.18);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .member-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #b3d9ff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            transition: 0.3s;
+        }
+
+        .member-card:hover img {
+            border-color: #4a8db7;
+        }
+
+        .member-card .name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0d2b44;
+            margin-bottom: 0.2rem;
+        }
+
+        .member-card .role {
+            font-size: 0.95rem;
+            color: #2f6a8a;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .member-card .icon-arrow {
+            margin-top: 0.8rem;
+            color: #4a8db7;
+            font-size: 1.2rem;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 30, 50, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #f0f9ff;
+            border-radius: 40px;
+            max-width: 600px;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            position: relative;
+            animation: modalPop 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #2f6a8a;
+            transition: 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #a03a3a;
+            transform: rotate(90deg);
+        }
+
+        .modal-box img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #b3d9ff;
+            display: block;
+            margin: 0 auto 1.2rem;
+        }
+
+        .modal-box h2 {
+            font-size: 2.2rem;
+            color: #0d2b44;
+            text-align: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-box .role-tag {
+            text-align: center;
+            font-size: 1rem;
+            color: #3a7a9a;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-box .details {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #1f4460;
+            background: rgba(255,255,255,0.5);
+            padding: 1.2rem 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #4a8db7;
+            text-align: justify;
+        }
+
+        .modal-box .contact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-size: 1rem;
+            color: #1a3a5c;
+            background: rgba(200, 225, 245, 0.4);
+            padding: 0.8rem 1.2rem;
+            border-radius: 15px;
+        }
+
+        .modal-box .contact i {
+            width: 1.8rem;
+            color: #2f6a8a;
+        }
+
+        /* === FOOTER === */
+        .footer-note {
+            text-align: center;
+            margin-top: 2rem;
+            color: #2b5a7a;
+            opacity: 0.7;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .footer-rights {
+            text-align: center;
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(43, 90, 122, 0.15);
+            color: #2b5a7a;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 600px) {
+            #splash h1 { font-size: 2.5rem; }
+            #splash .sub { font-size: 1.2rem; }
+            .header-title h1 { font-size: 2.5rem; }
+            .header-title .subtitle { font-size: 1rem; }
+            .card-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+            .member-card { max-width: 100%; }
+            .modal-box { padding: 1.8rem; }
+        }
+
+        @media (max-width: 400px) {
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SPLASH SCREEN ===== -->
+    <div id="splash">
+        <h1>خوش آمدید</h1>
+        <h1>WELCOME</h1>
+        <h1>ДОБРО ПОЖАЛОВАТЬ</h1>
+        <div class="sub">به گروه عیاران و کاکاها خوش آمدید</div>
+        <div class="credit">🌐 website by <strong>ATIQ</strong> — the leader</div>
+    </div>
+
+    <!-- ===== MAIN PAGE ===== -->
+    <div id="main">
+        <!-- Background texts -->
+        <div id="bg-container" style="position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:0;"></div>
+
+        <div class="content">
+            <!-- Header -->
+            <div class="header-title">
+                <h1>عیاران و کاکاها</h1>
+                <div class="subtitle">AYARAN WA KAKA HA &nbsp; | &nbsp; АЙАРАН ВА КАКА ХА</div>
+            </div>
+
+            <!-- Member Cards -->
+            <div class="card-grid" id="cardGrid">
+                <!-- Atiq -->
+                <div class="member-card" data-member="atiq">
+                    <img src="https://picsum.photos/seed/atiq/200/200" alt="Atiq">
+                    <div class="name">Atiq</div>
+                    <div class="role">Leader</div>
+                    <div class="icon-arrow"><i class="fas fa-chevron-circle-down"></i></div>
+                </div>
+                <!-- Yasar -->
+                <div class="member-card" data-member="yasar">
+                    <img src="https://picsum.photos/seed/yasar/200/200" alt="Yasar">
+                    <div class="name">Yasar</div>
+                    <div class="role">Member</div>
+                    <div class="icon-arrow"><i class="fas fa-chevron-circle-down"></i></div>
+                </div>
+                <!-- Raqeb -->
+                <div class="member-card" data-member="raqeb">
+                    <img src="https://picsum.photos/seed/raqeb/200/200" alt="Raqeb">
+                    <div class="name">Raqeb</div>
+                    <div class="role">Member</div>
+                    <div class="icon-arrow"><i class="fas fa-chevron-circle-down"></i></div>
+                </div>
+                <!-- Sayad -->
+                <div class="member-card" data-member="sayad">
+                    <img src="https://picsum.photos/seed/sayad/200/200" alt="Sayad">
+                    <div class="name">Sayad</div>
+                    <div class="role">Member</div>
+                    <div class="icon-arrow"><i class="fas fa-chevron-circle-down"></i></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-note">
+                <i class="fas fa-users"></i> چهار یار همیشه همراه
+            </div>
+            <div class="footer-rights">
+                All rights reserved 2026 · Website by ATIQ
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box" id="modalBox">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <img id="modalImg" src="" alt="member photo">
+            <h2 id="modalName"></h2>
+            <div class="role-tag" id="modalRole"></div>
+            <div class="details" id="modalDesc"></div>
+            <div class="contact" id="modalContact">
+                <div><i class="fas fa-map-pin"></i> <span id="modalAddress"></span></div>
+                <div><i class="fas fa-phone-alt"></i> <span id="modalPhone"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== DATA (Exact Dari texts provided) =====================
+        const members = {
+            atiq: {
+                name: 'Atiq',
+                role: 'Leader',
+                desc: `او رهبر رسمی و غیررسمی گروپ است! در دانشگاه مسکو درس می‌خواند و برای دوستانش یک آدم بسیار مهم است. باهوش‌ترین نفر گروپ است و البته خودش هم این موضوع را خوب می‌داند 😂 بیشتر از هر چیز عاشق خوش‌گذرانی است و همیشه تلاش می‌کند همه را دور هم جمع کند. برای خوشی و ساعت تير شدن خود از هیچ چیزی دریغ نمی‌کند، شب و روز كار مكند اما اصلا پول ندارد  خلاصه، اگر مشکلی در گروپ باشد، اول سراغ او می‌روند.`,
+                address: 'مسکو،   شماره ۳',
+                phone: '+7 999 808-55-62'
+            },
+            yasar: {
+                name: 'Yasar',
+                role: 'Member',
+                desc: `او در دانشگاه مسکو درس می‌خواند. آدم خوب و نسبتاً باهوشی است، البته به نظر خودش خیلی باهوش‌تر از این حرف‌هاست! 😂 او تقریباً همیشه فکر می‌کند حق با خودش است. چند بار قول داده که همه گروپ را دعوت کند، اما هنوز منتظریم! ظاهراً كه خودش نخواسته اما بايد دعوت بكند. حالا ببینیم بالاخره چي وقت وعده‌اش عملی می‌شود!`,
+                address: 'مسکو،   ',
+                phone: '+7 991 639-01-65'
+            },
+            raqeb: {
+                name: 'Raqeb',
+                role: 'Member',
+                desc: `ه  او وقتی مست می‌شود، یک قانون دارد من درست می‌گویم  😂 هر چیزی که بگوید، باید قبول شود وگرنه بحث شروع می‌شود! با این حال، آدم خوبی است و در مسکو بسیار سخت کار می‌کند تا هزینه دانشگاهش را پرداخت کند. او هم در دانشگاه مسکو درس می‌خواند و با وجود همه مشغله‌ها، برای دوستانش وقت می‌گذارد`,
+                address: 'مسکو،   ()',
+                phone: '+7 925 159-74-72'
+            },
+            sayad: {
+                name: 'Sayad',
+                role: 'Member',
+                desc: `او زیاد به مشکلات دنیا اهمیت نمی‌دهد هدفش فقط این است که زندگی را خوش بگذراند 😂اى دانشگاه را هم رها اگر چي تصميم خوب نبود، آدم بسیار صمیمی و خوبی است. هر وقت ناراحت، خوشحال یا حتی بی‌حوصله باشي، می‌توانی با او باشی و خوش بگذرانی. و البته فراموش نکنیم که ساقی خوبی هم هست`,
+                address: 'مسکو، آپارتمان شخصی',
+                phone: '+7 916 060-64-11'
+            }
+        };
+
+        // ===================== SPLASH TIMER (3 SECONDS) =====================
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    document.getElementById('main').style.display = 'block';
+                    generateBackgroundTexts();
+                }, 800);
+            }, 3000);
+        });
+
+        // ===================== BACKGROUND TEXTS =====================
+        function generateBackgroundTexts() {
+            const container = document.getElementById('bg-container');
+            const phrases = [
+                'عیاران و کاکاها',
+                'AYARAN WA KAKA HA',
+                'АЙАРАН ВА КАКА ХА'
+            ];
+            const count = 40;
+
+            for (let i = 0; i < count; i++) {
+                const span = document.createElement('span');
+                span.className = 'bg-text';
+                span.textContent = phrases[i % phrases.length];
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const rot = (Math.random() - 0.5) * 30;
+                const size = 2 + Math.random() * 3;
+                span.style.left = x + '%';
+                span.style.top = y + '%';
+                span.style.fontSize = size + 'rem';
+                span.style.transform = `rotate(${rot}deg)`;
+                span.style.opacity = 0.06 + Math.random() * 0.1;
+                span.style.color = '#7ab8d4';
+                container.appendChild(span);
+            }
+        }
+
+        // ===================== MODAL LOGIC =====================
+        const overlay = document.getElementById('modalOverlay');
+        const closeBtn = document.getElementById('modalClose');
+        const modalImg = document.getElementById('modalImg');
+        const modalName = document.getElementById('modalName');
+        const modalRole = document.getElementById('modalRole');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalAddress = document.getElementById('modalAddress');
+        const modalPhone = document.getElementById('modalPhone');
+
+        document.querySelectorAll('.member-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const key = card.dataset.member;
+                const data = members[key];
+                if (!data) return;
+
+                modalImg.src = `https://picsum.photos/seed/${key}/200/200`;
+                modalName.textContent = data.name;
+                modalRole.textContent = data.role;
+                modalDesc.textContent = data.desc;
+                modalAddress.textContent = data.address;
+                modalPhone.textContent = data.phone;
+
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        function closeModal() {
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+
+</body>
+</html>
